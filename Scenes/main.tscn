@@ -1,0 +1,102 @@
+[gd_scene load_steps=14 format=3 uid="uid://553d6a40jc4x"]
+
+[ext_resource type="PackedScene" uid="uid://q1n63t26vbe2" path="res://Scenes/Entities/player.tscn" id="1_w4o20"]
+[ext_resource type="Script" path="res://Scripts/Utilities/level.gd" id="1_xgb5b"]
+[ext_resource type="PackedScene" uid="uid://cgqi0dbsw4w58" path="res://Scenes/Camera/camera.tscn" id="2_tb2fj"]
+[ext_resource type="PackedScene" uid="uid://c03cidghtmoyh" path="res://Scenes/Components/lock_on_component.tscn" id="4_de248"]
+[ext_resource type="Script" path="res://Scripts/Systems/lock_on_system.gd" id="5_sdgcf"]
+
+[sub_resource type="Sky" id="Sky_5c3hk"]
+
+[sub_resource type="Environment" id="Environment_v70yy"]
+background_mode = 2
+sky = SubResource("Sky_5c3hk")
+tonemap_mode = 2
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hqc5h"]
+size = Vector3(20, 2, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xjb44"]
+albedo_color = Color(0.34902, 0.447059, 1, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_bt41c"]
+material = SubResource("StandardMaterial3D_xjb44")
+size = Vector2(20, 20)
+
+[sub_resource type="BoxMesh" id="BoxMesh_u7qy1"]
+size = Vector3(0.5, 2, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8kayo"]
+size = Vector3(0.5, 2, 0.5)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_onhtb"]
+radius = 10.0
+
+[node name="Main" type="Node3D" node_paths=PackedStringArray("player", "camera_controller", "lock_on_system")]
+script = ExtResource("1_xgb5b")
+player = NodePath("Player")
+camera_controller = NodePath("Camera")
+lock_on_system = NodePath("LockOnSystem")
+
+[node name="Player" parent="." instance=ExtResource("1_w4o20")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.57711, 0)
+collision_layer = 2
+
+[node name="Camera" parent="." instance=ExtResource("2_tb2fj")]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_v70yy")
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 0.449366, 0.893348, 0, -0.893348, 0.449366, 0, 2.83953, 0)
+
+[node name="Ground" type="StaticBody3D" parent="World"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+shape = SubResource("BoxShape3D_hqc5h")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="World/Ground"]
+mesh = SubResource("PlaneMesh_bt41c")
+
+[node name="Post" type="StaticBody3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -2.705)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="World/Post"]
+mesh = SubResource("BoxMesh_u7qy1")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Post"]
+shape = SubResource("BoxShape3D_8kayo")
+
+[node name="LockOnComponent" parent="World/Post" node_paths=PackedStringArray("component_owner") instance=ExtResource("4_de248")]
+component_owner = NodePath("..")
+
+[node name="Post2" type="StaticBody3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.46858, 1, -2.705)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="World/Post2"]
+mesh = SubResource("BoxMesh_u7qy1")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Post2"]
+shape = SubResource("BoxShape3D_8kayo")
+
+[node name="LockOnComponent" parent="World/Post2" node_paths=PackedStringArray("component_owner") instance=ExtResource("4_de248")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.6)
+component_owner = NodePath("..")
+
+[node name="LockOnSystem" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 16
+script = ExtResource("5_sdgcf")
+
+[node name="EnemyDetectionSphere" type="CollisionShape3D" parent="LockOnSystem"]
+shape = SubResource("SphereShape3D_onhtb")
+
+[node name="ChangeTargetTimer" type="Timer" parent="LockOnSystem"]
+
+[connection signal="area_entered" from="LockOnSystem" to="LockOnSystem" method="_on_area_entered"]
+[connection signal="area_exited" from="LockOnSystem" to="LockOnSystem" method="_on_area_exited"]
+[connection signal="lock_on" from="LockOnSystem" to="Player" method="_on_lock_on_system_lock_on"]
+[connection signal="timeout" from="LockOnSystem/ChangeTargetTimer" to="LockOnSystem" method="_on_change_target_timer_timeout"]

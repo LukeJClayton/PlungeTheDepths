@@ -1,0 +1,102 @@
+[gd_scene load_steps=17 format=3 uid="uid://q1n63t26vbe2"]
+
+[ext_resource type="Script" path="res://Scripts/Entities/player.gd" id="1_l32mb"]
+[ext_resource type="Script" path="res://Scripts/state_machine.gd" id="1_u3l0l"]
+[ext_resource type="Script" path="res://Scripts/States/Player/player_idle_state.gd" id="3_xglpa"]
+[ext_resource type="Script" path="res://Scripts/States/Player/player_walk_state.gd" id="4_3ynja"]
+[ext_resource type="Script" path="res://Scripts/States/Player/player_run_state.gd" id="5_xue7b"]
+[ext_resource type="Script" path="res://Scripts/States/Player/player_dodge_state.gd" id="6_qknlp"]
+[ext_resource type="Script" path="res://Scripts/States/Player/player_jump_state.gd" id="7_euels"]
+[ext_resource type="PackedScene" uid="uid://soovshh6xn0l" path="res://Scenes/Components/hitbox_component.tscn" id="7_v3hoe"]
+[ext_resource type="PackedScene" uid="uid://b6o80yrcqghn0" path="res://Scenes/Components/player_rotation_component.tscn" id="8_yvdea"]
+[ext_resource type="PackedScene" uid="uid://bbkrkmmj27vf0" path="res://Scenes/Components/movement_component.tscn" id="9_dwodu"]
+[ext_resource type="PackedScene" uid="uid://g0voku71gtri" path="res://Scenes/Components/dodge_component.tscn" id="10_kav37"]
+[ext_resource type="PackedScene" uid="uid://btwfn541jt7uw" path="res://Scenes/Components/jump_component.tscn" id="12_oqpoe"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_cjotd"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_q32mu"]
+size = Vector3(0.5, 0.5, 1)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_xuhhf"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_xw1mh"]
+
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("state_machine", "movement_component", "rotation_component", "dodge_component", "hitbox_component", "jump_component")]
+script = ExtResource("1_l32mb")
+state_machine = NodePath("StateMachine")
+movement_component = NodePath("MovementComponent")
+rotation_component = NodePath("PlayerRotationComponent")
+dodge_component = NodePath("DodgeComponent")
+hitbox_component = NodePath("HitboxComponent")
+jump_component = NodePath("JumpComponent")
+
+[node name="Character Model" type="Node3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Character Model"]
+mesh = SubResource("CapsuleMesh_cjotd")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Character Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.578821, -0.527851)
+mesh = SubResource("BoxMesh_q32mu")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("entity")]
+script = ExtResource("1_u3l0l")
+entity = NodePath("..")
+
+[node name="PlayerIdleState" type="Node" parent="StateMachine" node_paths=PackedStringArray("walk_state", "dodge_state", "entity")]
+script = ExtResource("3_xglpa")
+walk_state = NodePath("../PlayerWalkState")
+dodge_state = NodePath("../PlayerDodgeState")
+entity = NodePath("../..")
+
+[node name="PlayerWalkState" type="Node" parent="StateMachine" node_paths=PackedStringArray("idle_state", "run_state", "dodge_state", "entity")]
+script = ExtResource("4_3ynja")
+idle_state = NodePath("../PlayerIdleState")
+run_state = NodePath("../PlayerRunState")
+dodge_state = NodePath("../PlayerDodgeState")
+entity = NodePath("../..")
+
+[node name="PlayerRunState" type="Node" parent="StateMachine" node_paths=PackedStringArray("idle_state", "walk_state", "dodge_state", "jump_state", "entity")]
+script = ExtResource("5_xue7b")
+idle_state = NodePath("../PlayerIdleState")
+walk_state = NodePath("../PlayerWalkState")
+dodge_state = NodePath("../PlayerDodgeState")
+jump_state = NodePath("../PlayerJumpState")
+entity = NodePath("../..")
+
+[node name="PlayerDodgeState" type="Node" parent="StateMachine" node_paths=PackedStringArray("run_state", "entity")]
+script = ExtResource("6_qknlp")
+run_state = NodePath("../PlayerRunState")
+entity = NodePath("../..")
+
+[node name="PlayerJumpState" type="Node" parent="StateMachine" node_paths=PackedStringArray("walk_state", "entity")]
+script = ExtResource("7_euels")
+walk_state = NodePath("../PlayerWalkState")
+entity = NodePath("../..")
+
+[node name="Collider" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_xuhhf")
+
+[node name="HitboxComponent" parent="." node_paths=PackedStringArray("entity") instance=ExtResource("7_v3hoe")]
+entity = NodePath("..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HitboxComponent"]
+shape = SubResource("CapsuleShape3D_xw1mh")
+
+[node name="PlayerRotationComponent" parent="." node_paths=PackedStringArray("entity") instance=ExtResource("8_yvdea")]
+entity = NodePath("..")
+
+[node name="MovementComponent" parent="." node_paths=PackedStringArray("entity", "rotation_component") instance=ExtResource("9_dwodu")]
+speed = 1.0
+isPlayer = true
+entity = NodePath("..")
+rotation_component = NodePath("../PlayerRotationComponent")
+
+[node name="DodgeComponent" parent="." node_paths=PackedStringArray("entity", "movement_component") instance=ExtResource("10_kav37")]
+entity = NodePath("..")
+movement_component = NodePath("../MovementComponent")
+
+[node name="JumpComponent" parent="." node_paths=PackedStringArray("entity", "movement_component") instance=ExtResource("12_oqpoe")]
+entity = NodePath("..")
+movement_component = NodePath("../MovementComponent")

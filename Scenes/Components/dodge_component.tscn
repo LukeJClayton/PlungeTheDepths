@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://g0voku71gtri"]
+
+[ext_resource type="Script" path="res://Scripts/Components/dodge_component.gd" id="1_hxqx3"]
+
+[node name="DodgeComponent" type="Node3D"]
+script = ExtResource("1_hxqx3")

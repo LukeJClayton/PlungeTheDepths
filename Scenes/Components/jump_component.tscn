@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://btwfn541jt7uw"]
+
+[ext_resource type="Script" path="res://Scripts/Components/jump_component.gd" id="1_6cgpn"]
+
+[node name="JumpComponent" type="Node3D"]
+script = ExtResource("1_6cgpn")
+
+[node name="JumpRaycast" type="RayCast3D" parent="."]
+target_position = Vector3(0, -2, 0)

@@ -1,0 +1,34 @@
+[gd_scene load_steps=6 format=3 uid="uid://cgqi0dbsw4w58"]
+
+[ext_resource type="Script" path="res://Scripts/Camera/camera_controller.gd" id="1_8oqox"]
+[ext_resource type="Script" path="res://Scripts/Camera/camera_state_machine.gd" id="2_n7vww"]
+[ext_resource type="Script" path="res://Scripts/States/Camera/camera_normal_state.gd" id="3_tc152"]
+[ext_resource type="Script" path="res://Scripts/States/Camera/camera_freelook_state.gd" id="4_pjxmd"]
+[ext_resource type="Script" path="res://Scripts/States/Camera/camera_lock_on_state.gd" id="5_q3srr"]
+
+[node name="Camera" type="SpringArm3D"]
+script = ExtResource("1_8oqox")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("camera_controller", "camera")]
+script = ExtResource("2_n7vww")
+camera_controller = NodePath("..")
+camera = NodePath("../Camera3D")
+
+[node name="Normal" type="Node" parent="StateMachine" node_paths=PackedStringArray("camera_controller", "camera")]
+script = ExtResource("3_tc152")
+camera_controller = NodePath("../..")
+camera = NodePath("../../Camera3D")
+
+[node name="Free Look" type="Node" parent="StateMachine/Normal" node_paths=PackedStringArray("lock_on_state", "camera_controller", "camera")]
+script = ExtResource("4_pjxmd")
+lock_on_state = NodePath("../Locked On")
+camera_controller = NodePath("../../..")
+camera = NodePath("../../../Camera3D")
+
+[node name="Locked On" type="Node" parent="StateMachine/Normal" node_paths=PackedStringArray("free_look_state", "camera_controller", "camera")]
+script = ExtResource("5_q3srr")
+free_look_state = NodePath("../Free Look")
+camera_controller = NodePath("../../..")
+camera = NodePath("../../../Camera3D")
